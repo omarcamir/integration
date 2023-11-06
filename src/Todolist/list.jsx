@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { axiosInstance } from "../axios/axios.config";
+import { useDebounce } from "../dobounce";
 const Todolist = () => {
   const [todos, setTodos] = useState([]);
   const [taskname, setTaskname] = useState([]);
   const [searchName, setSearchName] = useState([]);
   const  getData =  () => {
-    axiosInstance.get("/todos").then((data) => {
-      console.log(data.data);
-      setTodos(data.data);
-    });
+    setTimeout(() => {
+      axiosInstance.get("/todos").then((data) => {
+        console.log(data.data);
+        setTodos(data.data);
+      });
+    }, 500);
   }
   useEffect(() => {
 getData()
@@ -23,11 +26,13 @@ getData()
     console.log('id', id)
     axiosInstance.delete(`/todos/${id}`).then(() => getData())
   };
-  const handleEdit = (content) => {};
+  const handleEdit = (status) => {
+    status.isCompleted = false
+    axiosInstance.patch('/todos/' + status.id, status).then(() => getData())
+  };
   const handleDone = (status) => {
     status.isCompleted = true
     axiosInstance.patch('/todos/' + status.id, status).then(() => getData())
-    console.log('status', status)
   };
 
   const addTask = async (e) => {
@@ -46,6 +51,8 @@ getData()
  
 
   };
+  // const searchQuery = useDebounce(query, 2000)
+
  const  handleSearch = (e) => {
     console.log(e.target.value)
     e.preventDefault();
@@ -59,7 +66,6 @@ getData()
       setTodos(data.data);
     });
   }
-
   return (
     <div className="todolist">
       <div className="search" onSubmit={addTask}>
